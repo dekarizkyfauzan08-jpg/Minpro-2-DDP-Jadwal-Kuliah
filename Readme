@@ -1,0 +1,947 @@
+Nama : Deka RIzky Fauzan
+Nim  : 2609116052
+
+Deskripsi Program
+Program Jadwal Kuliah merupakan aplikasi berbasis Python Command Line Interface (CLI) yang digunakan untuk mengelola data jadwal perkuliahan.
+Program memiliki sistem login dan role, yaitu:
+Admin: dapat menambah, melihat, mengubah, menghapus, dan mencari jadwal kuliah.
+User/Mahasiswa: hanya dapat melihat dan mencari jadwal kuliah.
+Program menggunakan struktur data Dictionary dan Nested Dictionary untuk menyimpan data akun dan jadwal. Program juga menggunakan beberapa library Python, yaitu `os`, `time`, `pwinput`, dan `prettytable`.
+
+1. Import Library
+
+
+
+Penjelasan
+
+Bagian ini digunakan untuk mengimpor library yang diperlukan oleh program.
+
+`os` digunakan untuk membersihkan tampilan layar terminal.
+`time` digunakan untuk memberikan jeda waktu pada program.
+`pwinput` digunakan untuk menerima input password agar karakter password tidak ditampilkan secara langsung.
+`PrettyTable` digunakan untuk menampilkan data jadwal dalam bentuk tabel yang lebih rapi.
+
+
+2. Data Akun
+
+python
+akun = {
+    "admin": {"password": "admin123", "role": "admin"},
+    "mahasiswa": {"password": "mhs123", "role": "user"}
+}
+
+Penjelasan
+
+Variabel `akun` merupakan nested dictionary yang digunakan untuk menyimpan informasi akun pengguna.
+
+Setiap akun memiliki:
+
+`username`
+`password`
+`role`
+
+Terdapat dua akun yang tersedia:
+
+| Username  | Password | Role  |
+| --------- | -------- | ----- |
+| admin     | admin123 | admin |
+| mahasiswa | mhs123   | user  |
+
+Role digunakan untuk menentukan menu yang dapat diakses oleh pengguna setelah berhasil login.
+
+
+3. Data Jadwal
+
+python
+jadwal = {
+    "1": {
+        "matkul": "Konsep Sistem Informasi",
+        "hari": "Senin",
+        "jam": "07:30",
+        "ruang": "C402"
+    },
+    "2": {
+        "matkul": "Pendidikan Agama Islam",
+        "hari": "Kamis",
+        "jam": "07:30",
+        "ruang": "C402"
+    }
+}
+
+Penjelasan
+
+Variabel `jadwal` merupakan **nested dictionary** yang digunakan untuk menyimpan data jadwal kuliah.
+
+Setiap jadwal memiliki beberapa informasi:
+
+`id` → identitas jadwal.
+`matkul` → nama mata kuliah.
+`hari` → hari perkuliahan.
+`jam` → waktu perkuliahan.
+`ruang` → ruangan perkuliahan.
+
+Contoh data awal:
+
+| ID | Mata Kuliah             | Hari  | Jam   | Ruang |
+| -- | ----------------------- | ----- | ----- | ----- |
+| 1  | Konsep Sistem Informasi | Senin | 07:30 | C402  |
+| 2  | Pendidikan Agama Islam  | Kamis | 07:30 | C402  |
+
+Data jadwal inilah yang nantinya dapat dikelola oleh admin dan dilihat oleh user.
+
+---
+
+4. Daftar Hari
+
+python
+daftar_hari = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"]
+
+Penjelasan
+
+Variabel `daftar_hari` berisi daftar hari yang diperbolehkan dalam program.
+
+Data ini digunakan ketika pengguna memasukkan hari pada saat:
+
+Menambahkan jadwal.
+Mengubah jadwal.
+Mencari jadwal.
+
+Dengan adanya daftar ini, program dapat melakukan validasi agar pengguna tidak memasukkan nama hari yang tidak sesuai.
+
+
+5. Fungsi `bersihkan_layar()`
+
+python
+def bersihkan_layar():
+    os.system("cls" if os.name == "nt" else "clear")
+
+Penjelasan
+
+Fungsi ini digunakan untuk membersihkan tampilan terminal.
+
+Program akan mendeteksi sistem operasi menggunakan `os.name`.
+
+Jika menggunakan Windows (`nt`), program menjalankan perintah `cls`.
+Jika menggunakan Linux/macOS, program menjalankan perintah `clear`.
+
+Output
+
+Tidak menghasilkan output teks secara langsung. Fungsi ini hanya membersihkan layar terminal.
+
+
+6. Fungsi `input_tidak_kosong()`
+
+python
+def input_tidak_kosong(pesan):
+    while True:
+        teks = input(pesan).strip()
+
+        if teks == "":
+            print("Data tidak boleh kosong")
+        else:
+            return teks
+
+Penjelasan
+
+Fungsi ini digunakan untuk memastikan pengguna tidak memasukkan data kosong.
+
+Program akan terus meminta input selama pengguna belum memasukkan data.
+
+Fungsi `.strip()` digunakan untuk menghilangkan spasi yang terdapat di awal atau akhir input.
+
+Contoh Output
+
+Jika pengguna tidak memasukkan data:
+
+text
+Mata kuliah: 
+Data tidak boleh kosong
+Mata kuliah:
+
+
+Jika pengguna memasukkan data:
+
+text
+Mata kuliah: Pemrograman Dasar
+
+Maka data akan diterima oleh program.
+
+
+7. Fungsi `input_hari()`
+
+python
+def input_hari():
+    while True:
+        hari = input("Hari: ").strip().capitalize()
+
+        if hari in daftar_hari:
+            return hari
+        else:
+            print("Hari tidak valid (Senin - Sabtu)")
+
+Penjelasan
+
+Fungsi ini digunakan untuk melakukan validasi input hari.
+
+.capitalize() digunakan agar huruf pertama dari input menjadi huruf kapital.
+
+Program kemudian mengecek apakah hari yang dimasukkan terdapat di dalam `daftar_hari`.
+
+Contoh Output
+
+Input benar:
+
+text
+Hari: senin
+
+Program akan menerima input tersebut sebagai:
+
+text
+Senin
+
+Input salah:
+
+text
+Hari: Minggu
+Hari tidak valid (Senin - Sabtu)
+
+Program akan meminta pengguna memasukkan hari kembali.
+
+
+8. Fungsi `cek_jam()`
+
+python
+def cek_jam(jam):
+    if len(jam) != 5 or jam[2] != ":":
+        return False
+
+    try:
+        jam_int = int(jam[0:2])
+        menit_int = int(jam[3:5])
+    except ValueError:
+        return False
+
+    return jam_int >= 0 and jam_int <= 23 and menit_int >= 0 and menit_int <= 59
+
+Penjelasan
+
+Fungsi `cek_jam()` digunakan untuk memvalidasi format waktu.
+
+Format yang diterima adalah:
+
+text
+HH:MM
+
+Contohnya:
+
+text
+07:30
+13:45
+21:00
+```
+
+Program melakukan beberapa pemeriksaan:
+
+1. Panjang input harus 5 karakter.
+2. Karakter ketiga harus berupa `:`.
+3. Dua karakter pertama harus berupa jam.
+4. Dua karakter terakhir harus berupa menit.
+5. Jam harus berada pada rentang `00–23`.
+6. Menit harus berada pada rentang `00–59`.
+
+Fungsi akan menghasilkan:
+
+text
+True
+
+
+jika format benar dan:
+
+text
+False
+
+
+jika format salah.
+
+
+9. Fungsi `input_jam()`
+
+python
+def input_jam():
+    while True:
+        jam = input("Jam (contoh 07:30): ").strip()
+
+        if cek_jam(jam):
+            return jam
+        else:
+            print("Format jam salah, gunakan HH:MM")
+
+Penjelasan
+
+Fungsi ini digunakan untuk meminta input jam dari pengguna.
+
+Fungsi `input_jam()` memanfaatkan fungsi `cek_jam()` untuk memeriksa apakah format waktu yang dimasukkan sudah benar.
+
+Contoh Output
+
+Input salah:
+
+text
+Jam (contoh 07:30): 25:70
+Format jam salah, gunakan HH:MM
+
+Input benar:
+
+text
+Jam (contoh 07:30): 07:30
+
+Input kemudian diterima oleh program.
+
+
+# 10. Fungsi `buat_id_baru()`
+
+python
+def buat_id_baru(data):
+    if len(data) == 0:
+        return "1"
+
+    return str(max(int(kunci) for kunci in data) + 1)
+
+Penjelasan
+
+Fungsi ini digunakan untuk membuat ID jadwal baru secara otomatis.
+
+Jika belum terdapat data jadwal, ID pertama akan dibuat:
+
+text
+1
+
+Jika sudah terdapat ID:
+
+```text
+1
+2
+3
+```
+
+maka ID berikutnya akan menjadi:
+
+text
+4
+
+
+Dengan demikian, pengguna tidak perlu memasukkan ID secara manual ketika menambahkan jadwal.
+
+
+11. Fungsi `tampilkan_jadwal()`
+
+```python
+def tampilkan_jadwal(data, judul="Daftar Jadwal"):
+    print(judul)
+
+    if len(data) == 0:
+        print("Belum ada jadwal")
+        return
+
+    tabel = PrettyTable()
+    tabel.field_names = ["ID", "Mata Kuliah", "Hari", "Jam", "Ruang"]
+
+    for id_jadwal in data:
+        isi = data[id_jadwal]
+        tabel.add_row([
+            id_jadwal,
+            isi["matkul"],
+            isi["hari"],
+            isi["jam"],
+            isi["ruang"]
+        ])
+
+    print(tabel)
+```
+
+### Penjelasan
+
+Fungsi ini digunakan untuk menampilkan seluruh data jadwal.
+
+Program menggunakan library `PrettyTable` agar data ditampilkan dalam bentuk tabel.
+
+Program juga melakukan pengecekan apakah data jadwal kosong.
+
+Jika kosong:
+
+```text
+Belum ada jadwal
+```
+
+Jika terdapat data, maka data akan ditampilkan dalam bentuk tabel.
+
+### Contoh Output
+
+```text
+Daftar Jadwal
++----+--------------------------+--------+-------+-------+
+| ID |       Mata Kuliah        |  Hari  |  Jam  | Ruang |
++----+--------------------------+--------+-------+-------+
+| 1  | Konsep Sistem Informasi  | Senin  | 07:30 | C402  |
+| 2  | Pendidikan Agama Islam   | Kamis  | 07:30 | C402  |
++----+--------------------------+--------+-------+-------+
+```
+
+---
+
+# 12. Fungsi `tambah_jadwal()`
+
+```python
+def tambah_jadwal(data):
+    print("Tambah Jadwal")
+
+    matkul = input_tidak_kosong("Mata kuliah: ")
+    hari = input_hari()
+    jam = input_jam()
+    ruang = input_tidak_kosong("Ruang: ")
+
+    id_baru = buat_id_baru(data)
+
+    data[id_baru] = {
+        "matkul": matkul,
+        "hari": hari,
+        "jam": jam,
+        "ruang": ruang
+    }
+
+    print("Jadwal berhasil ditambahkan")
+```
+
+### Penjelasan
+
+Fungsi ini digunakan untuk **menambahkan jadwal baru**.
+
+Prosesnya:
+
+1. Meminta nama mata kuliah.
+2. Meminta hari.
+3. Meminta jam.
+4. Meminta ruang.
+5. Membuat ID baru secara otomatis.
+6. Menyimpan data ke dictionary `jadwal`.
+7. Menampilkan pesan keberhasilan.
+
+### Contoh Output
+
+```text
+Tambah Jadwal
+Mata kuliah: Algoritma dan Pemrograman
+Hari: Selasa
+Jam (contoh 07:30): 10:00
+Ruang: C401
+Jadwal berhasil ditambahkan
+```
+
+Fungsi ini merupakan bagian dari operasi **Create** pada konsep CRUD.
+
+---
+
+# 13. Fungsi `ubah_jadwal()`
+
+```python
+def ubah_jadwal(data):
+    print("Ubah Jadwal")
+```
+
+Fungsi ini digunakan untuk **mengubah data jadwal yang sudah tersedia**.
+
+Program terlebih dahulu menampilkan jadwal, kemudian meminta ID jadwal yang ingin diubah.
+
+Jika ID ditemukan, pengguna dapat mengganti:
+
+* Mata kuliah
+* Hari
+* Jam
+* Ruang
+
+Jika ID tidak ditemukan, program akan menampilkan:
+
+```text
+ID jadwal tidak tersedia
+```
+
+### Contoh Output
+
+```text
+Ubah Jadwal
+
+Masukkan ID jadwal: 1
+Mata kuliah baru: Sistem Informasi
+Hari: Selasa
+Jam (contoh 07:30): 09:00
+Ruang baru: C401
+Jadwal berhasil diubah
+```
+
+Fungsi ini merupakan bagian dari operasi **Update** pada konsep CRUD.
+
+---
+
+# 14. Fungsi `hapus_jadwal()`
+
+```python
+def hapus_jadwal(data):
+    print("Hapus Jadwal")
+```
+
+### Penjelasan
+
+Fungsi ini digunakan untuk menghapus data jadwal.
+
+Sebelum data dihapus, program meminta konfirmasi kepada pengguna:
+
+```text
+Yakin ingin menghapus? (y/n):
+```
+
+Jika pengguna memasukkan:
+
+```text
+y
+```
+
+maka data akan dihapus menggunakan:
+
+```python
+data.pop(id_jadwal)
+```
+
+Jika pengguna memasukkan selain `y`, penghapusan dibatalkan.
+
+### Contoh Output
+
+```text
+Hapus Jadwal
+
+Masukkan ID jadwal: 2
+Yakin ingin menghapus? (y/n): y
+Jadwal berhasil dihapus
+```
+
+Jika dibatalkan:
+
+```text
+Yakin ingin menghapus? (y/n): n
+Penghapusan dibatalkan
+```
+
+Fungsi ini merupakan bagian dari operasi **Delete** pada konsep CRUD.
+
+---
+
+# 15. Fungsi `cari_jadwal()`
+
+```python
+def cari_jadwal(data):
+    print("Cari Jadwal Berdasarkan Hari")
+    hari = input_hari()
+
+    hasil = {}
+
+    for id_jadwal in data:
+        if data[id_jadwal]["hari"] == hari:
+            hasil[id_jadwal] = data[id_jadwal]
+```
+
+### Penjelasan
+
+Fungsi ini digunakan untuk mencari jadwal berdasarkan hari tertentu.
+
+Program meminta pengguna memasukkan hari, kemudian melakukan perulangan terhadap seluruh data jadwal.
+
+Jika hari pada jadwal sama dengan hari yang dicari, data tersebut dimasukkan ke dictionary `hasil`.
+
+Jika tidak ditemukan jadwal, program akan menampilkan:
+
+```text
+Tidak ada jadwal pada hari Senin
+```
+
+Jika ditemukan, program akan menampilkan jadwal berdasarkan hari yang dipilih.
+
+### Contoh Output
+
+```text
+Cari Jadwal Berdasarkan Hari
+Hari: Senin
+
+Jadwal Hari Senin
++----+-------------------------+-------+-------+-------+
+| ID |      Mata Kuliah        |  Hari |  Jam  | Ruang |
++----+-------------------------+-------+-------+-------+
+| 1  | Konsep Sistem Informasi | Senin | 07:30 | C402  |
++----+-------------------------+-------+-------+-------+
+```
+
+---
+
+# 16. Fungsi `login()`
+
+```python
+def login(data_akun):
+    kesempatan = 3
+```
+
+### Penjelasan
+
+Fungsi `login()` digunakan untuk melakukan autentikasi pengguna.
+
+Pengguna diberikan **3 kali kesempatan** untuk memasukkan username dan password.
+
+Password dimasukkan menggunakan:
+
+```python
+pwinput.pwinput("Password: ")
+```
+
+Sehingga password tidak ditampilkan secara langsung di terminal.
+
+Program kemudian mengecek apakah:
+
+1. Username terdapat dalam dictionary akun.
+2. Password yang dimasukkan sesuai dengan password akun.
+
+Jika benar:
+
+```text
+Login berhasil, selamat datang admin
+```
+
+Fungsi kemudian mengembalikan:
+
+```python
+username, role
+```
+
+Jika salah, kesempatan login dikurangi.
+
+### Contoh Login Berhasil
+
+```text
+LOGIN
+Username: admin
+Password:
+Login berhasil, selamat datang admin
+```
+
+### Contoh Login Gagal
+
+```text
+LOGIN
+Username: admin
+Password:
+Username atau password salah, sisa kesempatan: 2
+```
+
+Jika tiga kali gagal:
+
+```text
+Kesempatan login habis
+```
+
+---
+
+# 17. Menu Admin
+
+```python
+def menu_admin(username):
+```
+
+### Penjelasan
+
+Menu admin merupakan menu khusus pengguna yang memiliki role `admin`.
+
+Admin memiliki akses terhadap seluruh fitur pengelolaan jadwal.
+
+### Tampilan Menu
+
+```text
+PROGRAM JADWAL KULIAH - ADMIN (admin)
+
+1. Tambah Jadwal
+2. Tampilkan Jadwal
+3. Ubah Jadwal
+4. Hapus Jadwal
+5. Cari Jadwal per Hari
+6. Logout
+
+Pilih menu:
+```
+
+Pilihan menu tersebut terhubung dengan fungsi:
+
+| Pilihan | Fungsi               |
+| ------- | -------------------- |
+| 1       | `tambah_jadwal()`    |
+| 2       | `tampilkan_jadwal()` |
+| 3       | `ubah_jadwal()`      |
+| 4       | `hapus_jadwal()`     |
+| 5       | `cari_jadwal()`      |
+| 6       | Logout               |
+
+Admin memiliki akses **CRUD lengkap** terhadap data jadwal.
+
+---
+
+# 18. Menu User
+
+```python
+def menu_user(username):
+```
+
+### Penjelasan
+
+Menu user digunakan oleh pengguna dengan role `user`.
+
+Berbeda dengan admin, user tidak dapat menambahkan, mengubah, atau menghapus jadwal.
+
+User hanya memiliki akses untuk:
+
+1. Menampilkan jadwal.
+2. Mencari jadwal berdasarkan hari.
+3. Logout.
+
+### Tampilan Menu
+
+```text
+PROGRAM JADWAL KULIAH - USER (mahasiswa)
+
+1. Tampilkan Jadwal
+2. Cari Jadwal per Hari
+3. Logout
+
+Pilih menu:
+```
+
+Pembatasan tersebut digunakan untuk membedakan hak akses antara admin dan user.
+
+---
+
+# 19. Program Utama
+
+Bagian utama program menggunakan:
+
+```python
+while True:
+```
+
+Program akan terus berjalan sampai pengguna memilih menu **Keluar**.
+
+### Tampilan Awal
+
+```text
+PROGRAM JADWAL KULIAH
+
+1. Login
+2. Keluar
+
+Pilih menu:
+```
+
+Jika pengguna memilih:
+
+```text
+1
+```
+
+program akan menjalankan proses login.
+
+Setelah login berhasil, program memeriksa role pengguna.
+
+Jika role adalah:
+
+```text
+admin
+```
+
+maka program menjalankan:
+
+```python
+menu_admin(username)
+```
+
+Jika role bukan admin, program menjalankan:
+
+```python
+menu_user(username)
+```
+
+Jika pengguna memilih:
+
+```text
+2
+```
+
+program akan menampilkan:
+
+```text
+Program selesai
+```
+
+kemudian program berhenti.
+
+---
+
+# 20. Alur Kerja Program
+
+Secara keseluruhan, alur program dapat digambarkan sebagai berikut:
+
+```text
+                +----------------------+
+                |   PROGRAM JADWAL     |
+                |       KULIAH         |
+                +----------+-----------+
+                           |
+                    +------v------+
+                    |    LOGIN     |
+                    +------+-------+
+                           |
+                    Berhasil Login?
+                     /           \
+                   Tidak          Ya
+                    |             |
+              3 kesempatan       |
+                    |             |
+                    |       +-----v------+
+                    |       | Cek Role   |
+                    |       +-----+------+
+                    |             |
+              +-----v-----+       |
+              |  Login    |   +--+------+
+              |  gagal    |   |         |
+              +-----------+  Admin     User
+                              |         |
+                        +-----v--+   +--v------+
+                        |  Menu  |   |  Menu   |
+                        | Admin  |   |  User   |
+                        +--------+   +---------+
+                            |            |
+                     CRUD Jadwal     Lihat/Cari
+                            |            |
+                            +-----+------+
+                                  |
+                               Logout
+                                  |
+                           Kembali Login
+```
+
+---
+
+# 21. Konsep CRUD
+
+Program ini menerapkan konsep **CRUD (Create, Read, Update, Delete)**.
+
+### Create
+
+Digunakan untuk menambahkan jadwal baru.
+
+```python
+tambah_jadwal()
+```
+
+### Read
+
+Digunakan untuk menampilkan data jadwal.
+
+```python
+tampilkan_jadwal()
+```
+
+### Update
+
+Digunakan untuk mengubah jadwal.
+
+```python
+ubah_jadwal()
+```
+
+### Delete
+
+Digunakan untuk menghapus jadwal.
+
+```python
+hapus_jadwal()
+```
+
+Selain CRUD, terdapat fitur pencarian:
+
+```python
+cari_jadwal()
+```
+
+yang digunakan untuk mencari jadwal berdasarkan hari.
+
+---
+
+# 22. Contoh Penggunaan Program
+
+## Tampilan Awal
+
+```text
+PROGRAM JADWAL KULIAH
+1. Login
+2. Keluar
+Pilih menu: 1
+```
+
+## Login Admin
+
+```text
+LOGIN
+Username: admin
+Password:
+Login berhasil, selamat datang admin
+```
+
+## Menu Admin
+
+```text
+PROGRAM JADWAL KULIAH - ADMIN (admin)
+1. Tambah Jadwal
+2. Tampilkan Jadwal
+3. Ubah Jadwal
+4. Hapus Jadwal
+5. Cari Jadwal per Hari
+6. Logout
+Pilih menu: 2
+```
+
+## Output Jadwal
+
+```text
+Daftar Jadwal
++----+--------------------------+--------+-------+-------+
+| ID |       Mata Kuliah        |  Hari  |  Jam  | Ruang |
++----+--------------------------+--------+-------+-------+
+| 1  | Konsep Sistem Informasi  | Senin  | 07:30 | C402  |
+| 2  | Pendidikan Agama Islam   | Kamis  | 07:30 | C402  |
++----+--------------------------+--------+-------+-------+
+```
+
+---
+
+# 23. Kesimpulan
+
+Program **Jadwal Kuliah** merupakan program Python berbasis CLI yang menerapkan beberapa konsep dasar pemrograman, yaitu:
+
+* Variabel dan tipe data.
+* Dictionary.
+* Nested Dictionary.
+* List.
+* Function.
+* Percabangan `if-elif-else`.
+* Perulangan `while` dan `for`.
+* Validasi input.
+* Sistem login.
+* Role/hak akses pengguna.
+* CRUD.
+* Pencarian data.
+* Penggunaan library eksternal.
+* Pemformatan data menggunakan `PrettyTable`.
+
+Program ini dibuat untuk membantu pengelolaan data jadwal kuliah secara sederhana melalui terminal. Admin memiliki hak untuk mengelola data jadwal, sedangkan user/mahasiswa hanya memiliki akses untuk melihat dan mencari jadwal.
